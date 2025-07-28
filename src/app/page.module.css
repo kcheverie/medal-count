@@ -15,6 +15,14 @@
 }
 
 
+.button {
+  background-color: transparent;
+  border: none;
+}
+ 
+.active {
+  border-top: 2px solid black;
+}
 
 @media (prefers-color-scheme: dark) {
   .page {

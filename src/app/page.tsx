@@ -1,7 +1,6 @@
 'use client'
 import Image from 'next/image';
-import styles from "./page.module.css";
-import Table from "./components/Table"
+import { Table, TableHead, TableBody } from "./components/Table"
 import Button from './components/Button'
 import { useState, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname} from 'next/navigation'
@@ -97,7 +96,6 @@ interface Medal {
 }
   
 function sortMedals(a: object, b:object, sortType: string) {
-  console.log(sortType)
   let tie = (b as Medal).total === (a as Medal).total
   switch(sortType) {
     case "total":
@@ -131,8 +129,7 @@ function sortMedals(a: object, b:object, sortType: string) {
   }
 }
 
-
-const getPosition = (code) => {
+const getPosition = (code: string) => {
   switch(code) {
     case "AUT":
         return 0;
@@ -172,7 +169,6 @@ const getPosition = (code) => {
     case "USA":
       return -204;
   }
-  
 }
 
 export default function Home() {
@@ -195,55 +191,45 @@ export default function Home() {
   }).sort((a, b) => b.total-a.total))
   
   const handleClick = (type: string) => {
-    setSortType(type)
     setMedals([...medals.sort((a, b) => sortMedals(a, b, type))])
     router.push(pathname + '?' + createQueryString('sort', type))
+    setSortType(type)
   }
 
   return (
-    <table className={styles.page}>
-      <thead>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
 
-          <td>
-            <Button handleClick={handleClick} type="gold"/>
-          </td>
-          <td>
-            <Button handleClick={handleClick} type="silver"/>          
-          </td>
-          <td>
-            <Button handleClick={handleClick} type="bronze"/>          
-          </td>
-          <td>
-            <Button handleClick={handleClick} type="total"/>
-          </td>
-        </tr>
-      </thead>
-      <tbody>
-          {medals.map((medal, index) => {
+    <Table>
+      <TableHead>
+          <></>
+          <></>
+          <></>
+          <Button handleClick={handleClick} sortType={sortType} type="gold"/>
+          <Button handleClick={handleClick} sortType={sortType} type="silver"/>          
+          <Button handleClick={handleClick} sortType={sortType} type="bronze"/>          
+          <Button handleClick={handleClick} sortType={sortType} type="total"/>
+      </TableHead>
+      <TableBody>
+        {medals.map((medal, index) => {
             return (
-              <tr key={medal.code}>
-                <td>{index + 1}</td>
-                <td>
+              <>
+                <div>{index + 1}</div>
+                <div>
                   <div style={{
                     backgroundPosition: `28px ${getPosition(medal.code)}px`,
                     backgroundImage: `url(${bg.src})`,
                     width: '28px',
                     height: '17px',
                   }}/>
-                </td>
-                <td>{medal.code}</td>
-                <td>{medal.gold}</td>
-                <td>{medal.silver}</td>
-                <td>{medal.bronze}</td>
-                <td><strong>{(medal as Medal).total}</strong></td>
-              </tr>
+                </div>
+                <div>{medal.code}</div>
+                <div>{medal.gold}</div>
+                <div>{medal.silver}</div>
+                <div>{medal.bronze}</div>
+                <div><strong>{(medal as Medal).total}</strong></div>
+              </>
             )
           })}
-          </tbody>
-    </table>
+      </TableBody>
+    </Table>
   );
 }
