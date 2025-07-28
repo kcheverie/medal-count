@@ -35,10 +35,8 @@ const TableBody = ({ children }) => {
 }
 
 const  Table = ({children}: Props) => {
-
-
   const childArray = React.Children.toArray(children);
-
+ 
   const tableHead = childArray.find(
     (child: any) => child.type === TableHead
   );
