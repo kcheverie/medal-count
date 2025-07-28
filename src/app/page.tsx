@@ -2,8 +2,8 @@
 
 import styles from "./page.module.css";
 import Table from "./components/Table"
-import { useState } from 'react';
-import { useSearchParams} from 'next/navigation'
+import { useState, useCallback } from 'react';
+import { useSearchParams, useRouter, usePathname} from 'next/navigation'
 
 let medalss = [{
   "code": "USA",
@@ -93,28 +93,93 @@ interface Medal {
   total?: number
   code: string 
 }
-
-function sortMedals(a: object, b:object) {
-  return b.total-a.total
+  
+function sortMedals(a: object, b:object, sortType: string) {
+  console.log(sortType)
+  let tie = b.total === a.total
+  switch(sortType) {
+    case "total":
+      if (tie) {
+        return b.gold - a.gold;
+      } else {
+        return b.total-a.total;
+      }
+      break;
+    case "gold":
+      if (tie) {
+        return b.silver - a.silver
+      } else {
+        return b.gold-a.gold;   
+      }
+      break;
+    case "silver":
+      if (tie) { 
+        return b.gold = a.gold;
+      } else {
+        return b.silver-a.silver;  
+      }
+      break;
+    case "bronze":
+      if (tie) {
+        return b.gold - a.gold;
+      } else {
+        return b.bronze-a.bronze; 
+      }
+      break;
+  }
 }
 
+
 export default function Home() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set(name, value)
+ 
+      return params.toString()
+    },
+    [searchParams]
+  )
+  const [sortType, setSortType] = useState('total')
+
   const [medals, setMedals] = useState(medalss.map((medal) => {
-      (medal as medalType).total = medal.gold + medal.silver + medal.bronze;
+    (medal as medalType).total = medal.gold + medal.silver + medal.bronze;
       return medal;
-  }).sort(sortMedals))
+  }).sort((a, b) => b.total-a.total))
   
+  const handleClick = (event: any) => {
+    event.preventDefault();
+    setSortType(event.target.id)
+    setMedals([...medals.sort((a, b) => sortMedals(a, b, event.target.id))])
+    router.push(pathname + '?' + createQueryString('sort', event.target.id))
+  }
+
   return (
     <table>
       <thead>
-        <td></td>
-        <td>gold</td>
-        <td>bronze</td>
-        <td>silver</td>
-        <td>total</td>
+        <tr>
+          <td></td>
+          <td>
+            <button id="gold" onClick={handleClick}>gold</button>
+          </td>
+          <td>
+            <button id="silver" onClick={handleClick}>silver</button>
+
+          </td>
+          <td>
+            <button id="bronze" onClick={handleClick}>bronze</button>
+          </td>
+          <td>
+            <button id="total" onClick={handleClick}>total</button>
+          </td>
+        </tr>
       </thead>
       <tbody>
           {medals.map((medal, index) => {
+            console.log('rerender')
             return (
               <tr key={medal.code}>
                 <td>{index + 1} {medal.code}</td>
